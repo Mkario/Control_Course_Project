@@ -14,14 +14,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def __init__(self):
         self.G = None
-        self.solutionLine = None
-        self.calculate = None
-        self.titlelLine = None
-        self.enterGraph = None
-        self.NoNodes = None
-        self.centralwidget = None
-        self.title = None
-        self.noNodesLabel = None
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -41,14 +33,14 @@ class Ui_MainWindow(object):
         self.title.setFont(font)
         self.title.setObjectName("title")
 
-        self.NoNodes = QtWidgets.QSpinBox(self.centralwidget)
-        self.NoNodes.setGeometry(QtCore.QRect(320, 130, 271, 71))
+        self.noNodes = QtWidgets.QSpinBox(self.centralwidget)
+        self.noNodes.setGeometry(QtCore.QRect(320, 130, 271, 71))
         font = QtGui.QFont()
         font.setFamily("Malgun Gothic")
         font.setPointSize(22)
-        self.NoNodes.setFont(font)
-        self.NoNodes.setStyleSheet("background-color: ghostWhite;")
-        self.NoNodes.setObjectName("NoNodes")
+        self.noNodes.setFont(font)
+        self.noNodes.setStyleSheet("background-color: ghostWhite;")
+        self.noNodes.setObjectName("NoNodes")
 
         self.titlelLine = QtWidgets.QFrame(self.centralwidget)
         self.titlelLine.setGeometry(QtCore.QRect(0, 90, 611, 16))
@@ -94,8 +86,10 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def showGraph(self):
+        # TODO fix this -- opens only once per program run
         from Grapher import Grapher
         self.G = Grapher.G
+        Grapher.noNodes = self.noNodes.value()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

@@ -1,8 +1,7 @@
-import os
-from subprocess import call
 import networkx as nx
 import matplotlib.pyplot as plt
 from PyQt5 import QtWidgets
+from numpy import number
 
 from GainIP import GainIP
 
@@ -12,13 +11,16 @@ class Grapher:
     from_node = None
     to_node = None
     gainWindow = GainIP()
+    noNodes = 0
 
     @classmethod
     def add_node(cls, event):
-        if event.button == 1:  # left mouse button
+
+        if event.button == 1 and cls.noNodes > 0:  # left mouse button
             x, y = event.xdata, event.ydata
             node = len(cls.G)
             cls.G.add_node(node, pos=(x, y))
+            cls.noNodes = cls.noNodes - 1
             cls.draw_graph()
 
         if event.button == 3:  # right mouse button
@@ -36,15 +38,23 @@ class Grapher:
                         cls.input_weight(cls.from_node, cls.to_node)
                     else:
                         cls.G.add_edge(cls.from_node, cls.to_node)
+                        Grapher.noNodes = Grapher.noNodes - 1
                         cls.draw_graph()
                     cls.from_node = None
                     cls.to_node = None
 
     @classmethod
-    def input_weight(self, fromNode, toNode):
-        self.window = QtWidgets.QDialog()
-        self.gainWindow.setupUi(self.window, fromNode, toNode)
-        self.window.show()
+    def input_weight(cls, fromNode, toNode):
+        cls.window = QtWidgets.QDialog()
+        cls.gainWindow.setupUi(cls.window, fromNode, toNode)
+        cls.window.show()
+        cls.gainWindow.addGain.clicked.connect(cls.update)
+
+    @classmethod
+    def update(cls):
+        cls.G[cls.from_node][cls.to_node]['weight'] = number(cls.gainWindow.gainIP.text())
+        print(cls.gainWindow.gainIP.text())
+        cls.draw_graph()
 
     @classmethod
     def get_closest_node(cls, x, y):

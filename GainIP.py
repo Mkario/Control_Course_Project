@@ -13,11 +13,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class GainIP(object):
     def __init__(self):
-        self.label = None
-        self.gainIP = None
-        self.addGain = None
         self.fromNode = 0
         self.toNode = 0
+        self.gain = 0
 
     def setupUi(self, fromTo, fromNode, toNode):
         self.fromNode = fromNode
@@ -36,6 +34,7 @@ class GainIP(object):
         self.addGain.setStyleSheet("background-color: rgb(0, 100, 125);\n"
                                    "color: ghostWhite;")
         self.addGain.setObjectName("addGain")
+        self.addGain.clicked.connect(self.setGain)
 
         self.gainIP = QtWidgets.QLineEdit(fromTo)
         self.gainIP.setGeometry(QtCore.QRect(70, 100, 171, 51))
@@ -58,6 +57,10 @@ class GainIP(object):
 
         self.retranslateUi(fromTo)
         QtCore.QMetaObject.connectSlotsByName(fromTo)
+
+    def setGain(self):
+        self.gain = self.gainIP.text()
+        print(self.gain)
 
     def retranslateUi(self, fromTo):
         _translate = QtCore.QCoreApplication.translate
