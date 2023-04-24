@@ -11,13 +11,18 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_fromTo(object):
+class GainIP(object):
     def __init__(self):
         self.label = None
         self.gainIP = None
         self.addGain = None
+        self.fromNode = 0
+        self.toNode = 0
 
-    def setupUi(self, fromTo):
+    def setupUi(self, fromTo, fromNode, toNode):
+        self.fromNode = fromNode
+        self.toNode = toNode
+
         fromTo.setObjectName("fromTo")
         fromTo.resize(320, 280)
         fromTo.setStyleSheet("background-color:  rgb(204, 217, 221);")
@@ -36,6 +41,10 @@ class Ui_fromTo(object):
         self.gainIP.setGeometry(QtCore.QRect(70, 100, 171, 51))
         self.gainIP.setStyleSheet("background-color: ghostWhite;")
         self.gainIP.setObjectName("gainIP")
+        font = QtGui.QFont()
+        font.setFamily("Malgun Gothic")
+        font.setPointSize(22)
+        self.gainIP.setFont(font)
 
         self.label = QtWidgets.QLabel(fromTo)
         self.label.setGeometry(QtCore.QRect(20, 40, 281, 31))
@@ -55,15 +64,16 @@ class Ui_fromTo(object):
         fromTo.setWindowTitle(_translate("fromTo", "GainWindow"))
         self.addGain.setText(_translate("fromTo", "Add Gain"))
         self.label.setText(_translate("fromTo",
-                                      "<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; color:#2d2d2d; vertical-align:super;\">Gain From node 1 to node 2</span></p></body></html>"))
+                                      f"<html><head/><body><p align=\"center\"><span style=\" font-size:20pt; "
+                                      f"color:#2d2d2d; vertical-align:super;\">Gain From node {self.fromNode} to node {self.toNode}"
+                                      "</span></p></body></html>"))
 
 
 if __name__ == "__main__":
     import sys
-
     app = QtWidgets.QApplication(sys.argv)
     fromTo = QtWidgets.QDialog()
-    ui = Ui_fromTo()
+    ui = GainIP()
     ui.setupUi(fromTo)
     fromTo.show()
     sys.exit(app.exec_())

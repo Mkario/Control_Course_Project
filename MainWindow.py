@@ -11,9 +11,9 @@ from subprocess import call
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def __init__(self):
+        self.G = None
         self.solutionLine = None
         self.calculate = None
         self.titlelLine = None
@@ -29,6 +29,7 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("background-color:  rgb(204, 217, 221);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+
         self.title = QtWidgets.QLabel(self.centralwidget)
         self.title.setGeometry(QtCore.QRect(70, 0, 451, 81))
         font = QtGui.QFont()
@@ -39,6 +40,7 @@ class Ui_MainWindow(object):
         font.setWeight(50)
         self.title.setFont(font)
         self.title.setObjectName("title")
+
         self.NoNodes = QtWidgets.QSpinBox(self.centralwidget)
         self.NoNodes.setGeometry(QtCore.QRect(320, 130, 271, 71))
         font = QtGui.QFont()
@@ -47,12 +49,14 @@ class Ui_MainWindow(object):
         self.NoNodes.setFont(font)
         self.NoNodes.setStyleSheet("background-color: ghostWhite;")
         self.NoNodes.setObjectName("NoNodes")
+
         self.titlelLine = QtWidgets.QFrame(self.centralwidget)
         self.titlelLine.setGeometry(QtCore.QRect(0, 90, 611, 16))
         self.titlelLine.setFrameShadow(QtWidgets.QFrame.Plain)
         self.titlelLine.setLineWidth(3)
         self.titlelLine.setFrameShape(QtWidgets.QFrame.HLine)
         self.titlelLine.setObjectName("titleLine")
+
         self.noNodesLabel = QtWidgets.QLabel(self.centralwidget)
         self.noNodesLabel.setGeometry(QtCore.QRect(20, 140, 261, 51))
         self.noNodesLabel.setObjectName("noNodesLabel")
@@ -77,21 +81,21 @@ class Ui_MainWindow(object):
         self.calculate.setStyleSheet("background-color: rgb(0, 100, 125);\n"
                                      "color: ghostWhite;")
         self.calculate.setObjectName("calculate")
+
         self.solutionLine = QtWidgets.QFrame(self.centralwidget)
         self.solutionLine.setGeometry(QtCore.QRect(0, 330, 611, 20))
         self.solutionLine.setFrameShadow(QtWidgets.QFrame.Plain)
         self.solutionLine.setLineWidth(2)
         self.solutionLine.setFrameShape(QtWidgets.QFrame.HLine)
         self.solutionLine.setObjectName("solutionLine")
-        MainWindow.setCentralWidget(self.centralwidget)
 
+        MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def showGraph(self):
-        current_dir = os.getcwd()
-        main_window_path = os.path.join(current_dir, 'main.py')
-        call(["python", main_window_path])
+        from Grapher import Grapher
+        self.G = Grapher.G
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
