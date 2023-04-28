@@ -1,7 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from PyQt5 import QtWidgets
-from numpy import number
 
 from GainIP import GainIP
 
@@ -35,25 +34,25 @@ class Grapher:
                 cls.to_node = cls.get_closest_node(event.xdata, event.ydata)
                 if cls.to_node is not None:
                     if cls.G.has_edge(cls.from_node, cls.to_node):
-                        cls.input_weight(cls.from_node, cls.to_node)
+                        cls.set_weight()
                     else:
                         cls.G.add_edge(cls.from_node, cls.to_node)
-                        Grapher.noNodes = Grapher.noNodes - 1
                         cls.draw_graph()
                     cls.from_node = None
                     cls.to_node = None
 
-    @classmethod
-    def input_weight(cls, fromNode, toNode):
-        cls.window = QtWidgets.QDialog()
-        cls.gainWindow.setupUi(cls.window, fromNode, toNode)
-        cls.window.show()
-        cls.gainWindow.addGain.clicked.connect(cls.update)
+    # @classmethod
+    # def input_weight(cls, fromNode, toNode):
+        # cls.window = QtWidgets.QDialog()
+        # cls.gainWindow.setupUi(cls.window, fromNode, toNode)
+        # cls.window.show()
+        # cls.gainWindow.addGain.clicked.connect(cls.set_weight)
 
     @classmethod
-    def update(cls):
-        cls.G[cls.from_node][cls.to_node]['weight'] = number(cls.gainWindow.gainIP.text())
-        print(cls.gainWindow.gainIP.text())
+    def set_weight(cls):
+        # weight = int(cls.gainWindow.gainIP.text())
+        weight = input(f"Enter gain from node {cls.from_node} to node {cls.to_node}: ")
+        cls.G[cls.from_node][cls.to_node]['weight'] = weight
         cls.draw_graph()
 
     @classmethod

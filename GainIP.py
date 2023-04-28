@@ -34,7 +34,6 @@ class GainIP(object):
         self.addGain.setStyleSheet("background-color: rgb(0, 100, 125);\n"
                                    "color: ghostWhite;")
         self.addGain.setObjectName("addGain")
-        self.addGain.clicked.connect(self.setGain)
 
         self.gainIP = QtWidgets.QLineEdit(fromTo)
         self.gainIP.setGeometry(QtCore.QRect(70, 100, 171, 51))
@@ -58,9 +57,6 @@ class GainIP(object):
         self.retranslateUi(fromTo)
         QtCore.QMetaObject.connectSlotsByName(fromTo)
 
-    def setGain(self):
-        self.gain = self.gainIP.text()
-        print(self.gain)
 
     def retranslateUi(self, fromTo):
         _translate = QtCore.QCoreApplication.translate
