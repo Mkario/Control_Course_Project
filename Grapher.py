@@ -1,12 +1,39 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import sys
 
 from GainIP import GainIP
+from MainWindow import QtCore
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QMessageBox, QDialog, QLabel
 
+
+class InputDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle('Input Dialog')
+        self.label = QLabel('Enter Gain:', self)
+        self.line_edit = QLineEdit(self)
+        self.ok_button = QPushButton('OK', self)
+        self.cancel_button = QPushButton('Cancel', self)
+
+        self.ok_button.clicked.connect(self.accept)
+        self.cancel_button.clicked.connect(self.reject)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.label)
+        layout.addWidget(self.line_edit)
+        layout.addWidget(self.ok_button)
+        layout.addWidget(self.cancel_button)
+
+    def get_text(self):
+        text, ok = self.line_edit.text(), self.result() == QDialog.Accepted
+        return text if ok and text != '' else None
 
 class Grapher:
     GDraw = nx.DiGraph()
     G = nx.DiGraph()
+    input_dialogue = InputDialog()
     from_node = None
     to_node = None
     gainWindow = GainIP()
@@ -30,11 +57,13 @@ class Grapher:
                 if cls.from_node is not None:
                     nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='red',
                                            nodelist=[cls.from_node])
+                    print("from node is: ",cls.from_node)
                     plt.draw()
 
             elif cls.to_node is None:
                 cls.to_node = cls.get_closest_node(event.xdata, event.ydata)
                 if cls.to_node is not None:
+                    print("to node is: ",cls.to_node)
                     if not cls.G.has_edge(cls.from_node, cls.to_node):
                         cls.G.add_edge(cls.from_node, cls.to_node)
                         cls.set_weight()
@@ -46,22 +75,26 @@ class Grapher:
 
     # @classmethod
     # def input_weight(cls, fromNode, toNode):
-        # cls.window = QtWidgets.QDialog()
-        # cls.gainWindow.setupUi(cls.window, fromNode, toNode)
-        # cls.window.show()
-        # cls.gainWindow.addGain.clicked.connect(cls.set_weight)
+    #     cls.window = QtWidgets.QDialog()
+    #     cls.gainWindow.setupUi(cls.window, fromNode, toNode)
+    #     cls.window.show()
+    #     cls.gainWindow.addGain.clicked.connect(cls.set_weight)
 
     @classmethod
     def set_weight(cls):
-        cls.weight = input(f"Enter gain from node {cls.from_node} to node {cls.to_node}: ")
+        QtCore.pyqtRemoveInputHook()
+        cls.weight = cls.get_input()
+        while cls.weight is None or not cls.weight.isnumeric() :
+            cls.weight = cls.get_input()
         cls.G[cls.from_node][cls.to_node]['weight'] = cls.weight
-        cls.draw_graph()
-        pos = nx.get_node_attributes(cls.GDraw, 'pos')
+        pos = nx.get_node_attributes(cls.GDraw,'pos')
         nx.draw_networkx_edges(cls.GDraw, pos, edgelist=[(cls.from_node, cls.to_node, cls.weight)],
                                connectionstyle='arc3,rad=0.5')
         edge_labels = nx.get_edge_attributes(cls.G, 'weight')
         nx.draw_networkx_edge_labels(cls.G, pos, edge_labels=edge_labels, label_pos=0.5,
                                      horizontalalignment='center', verticalalignment='bottom')
+        plt.show()
+        print("Adj list", cls.G.adj)
 
     @classmethod
     def get_closest_node(cls, x, y):
@@ -93,6 +126,11 @@ class Grapher:
         cls.from_node = None
         cls.to_node = None
         cls.draw_graph()
+
+    @classmethod
+    def get_input(self):
+        self.input_dialogue.exec_()
+        return self.input_dialogue.get_text()
 
 
 # Create a Matplotlib figure and axes
