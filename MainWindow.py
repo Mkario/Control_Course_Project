@@ -88,7 +88,7 @@ class Ui_MainWindow(object):
     def showGraph(self):
         # TODO fix this -- opens only once per program run
         from Grapher import Grapher
-        self.G = Grapher.G
+        self.G = Grapher.GDraw
         Grapher.noNodes = self.noNodes.value()
 
     def retranslateUi(self, MainWindow):
