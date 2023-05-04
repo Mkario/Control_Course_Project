@@ -2,7 +2,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import sys
 
-from GainIP import GainIP
 from MainWindow import QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QMessageBox, QDialog, QLabel
 
@@ -30,15 +29,17 @@ class InputDialog(QDialog):
         text, ok = self.line_edit.text(), self.result() == QDialog.Accepted
         return text if ok and text != '' else None
 
+
 class Grapher:
     GDraw = nx.DiGraph()
     G = nx.DiGraph()
     input_dialogue = InputDialog()
     from_node = None
     to_node = None
-    gainWindow = GainIP()
     noNodes = 0
     weight = 0
+    source = None
+    destination = None
 
     @classmethod
     def add_node(cls, event):
@@ -51,19 +52,35 @@ class Grapher:
             cls.noNodes = cls.noNodes - 1
             cls.draw_graph()
 
+        if event.button == 1 and event.dblclick and cls.noNodes > 0:
+            node = cls.get_closest_node(event.xdata, event.ydata)
+            print("heyy")
+            if cls.source is not None:
+                cls.destination = node
+                nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='green',
+                                       nodelist=[cls.destination])
+                print("selected node is: ", cls.destination)
+            else:
+                cls.source = node
+                nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='green',
+                                       nodelist=[cls.source])
+                print("selected node is: ", cls.source)
+
+            plt.draw()
+
         if event.button == 3:  # right mouse button
             if cls.from_node is None:
                 cls.from_node = cls.get_closest_node(event.xdata, event.ydata)
                 if cls.from_node is not None:
                     nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='red',
                                            nodelist=[cls.from_node])
-                    print("from node is: ",cls.from_node)
+                    print("from node is: ", cls.from_node)
                     plt.draw()
 
             elif cls.to_node is None:
                 cls.to_node = cls.get_closest_node(event.xdata, event.ydata)
                 if cls.to_node is not None:
-                    print("to node is: ",cls.to_node)
+                    print("to node is: ", cls.to_node)
                     if not cls.G.has_edge(cls.from_node, cls.to_node):
                         cls.G.add_edge(cls.from_node, cls.to_node)
                         cls.set_weight()
@@ -73,21 +90,14 @@ class Grapher:
                     cls.from_node = None
                     cls.to_node = None
 
-    # @classmethod
-    # def input_weight(cls, fromNode, toNode):
-    #     cls.window = QtWidgets.QDialog()
-    #     cls.gainWindow.setupUi(cls.window, fromNode, toNode)
-    #     cls.window.show()
-    #     cls.gainWindow.addGain.clicked.connect(cls.set_weight)
-
     @classmethod
     def set_weight(cls):
         QtCore.pyqtRemoveInputHook()
         cls.weight = cls.get_input()
-        while cls.weight is None:
+        while cls.weight is None or not cls.weight.isnumeric():
             cls.weight = cls.get_input()
         cls.G[cls.from_node][cls.to_node]['weight'] = cls.weight
-        pos = nx.get_node_attributes(cls.GDraw,'pos')
+        pos = nx.get_node_attributes(cls.GDraw, 'pos')
         nx.draw_networkx_edges(cls.GDraw, pos, edgelist=[(cls.from_node, cls.to_node, cls.weight)],
                                connectionstyle='arc3,rad=0.5')
         edge_labels = nx.get_edge_attributes(cls.G, 'weight')
@@ -123,14 +133,15 @@ class Grapher:
     @classmethod
     def clear_graph(cls):
         cls.GDraw.clear()
+        cls.G.clear()
         cls.from_node = None
         cls.to_node = None
         cls.draw_graph()
 
     @classmethod
-    def get_input(self):
-        self.input_dialogue.exec_()
-        return self.input_dialogue.get_text()
+    def get_input(cls):
+        cls.input_dialogue.exec_()
+        return cls.input_dialogue.get_text()
 
 
 # Create a Matplotlib figure and axes
@@ -141,10 +152,10 @@ ax.set_xlim([-1, 1])
 ax.set_ylim([-1, 1])
 
 # Register the event handler function for mouse clicks
-cid = fig.canvas.mpl_connect('button_press_event', Grapher.add_node)
+fig.canvas.mpl_connect('button_press_event', Grapher.add_node)
 
 # Register the event handler function for closing the window
-cid_close = fig.canvas.mpl_connect('close_event', Grapher.clear_graph)
+# cid_close = fig.canvas.mpl_connect('close_event', Grapher.clear_graph)
 
 # Draw the initial empty graph
 Grapher.draw_graph()
