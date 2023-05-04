@@ -1,2 +1,3 @@
-for loop in solve.get_loops():
-    #     print(loop.loop)
+def calculate(self):
+    #     solver = Solver(Grapher.G.adj, start_node, end_node)
+    #     solver.calculate_transferFunction()

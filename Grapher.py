@@ -84,7 +84,7 @@ class Grapher:
     def set_weight(cls):
         QtCore.pyqtRemoveInputHook()
         cls.weight = cls.get_input()
-        while cls.weight is None or not cls.weight.isnumeric() :
+        while cls.weight is None:
             cls.weight = cls.get_input()
         cls.G[cls.from_node][cls.to_node]['weight'] = cls.weight
         pos = nx.get_node_attributes(cls.GDraw,'pos')

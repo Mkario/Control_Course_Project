@@ -88,8 +88,13 @@ class Ui_MainWindow(object):
     def showGraph(self):
         # TODO fix this -- opens only once per program run
         from Grapher import Grapher
-        self.G = Grapher.GDraw
+        self.G = Grapher.G
         Grapher.noNodes = self.noNodes.value()
+
+    # def calculate(self):
+    #     solver = Solver(Grapher.G.adj, start_node, end_node)
+    #     solver.calculate_transferFunction() 
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
