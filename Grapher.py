@@ -38,8 +38,6 @@ class Grapher:
     to_node = None
     noNodes = 0
     weight = 0
-    source = None
-    destination = None
 
     @classmethod
     def add_node(cls, event):
