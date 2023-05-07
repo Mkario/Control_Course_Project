@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 from sympy import sympify
 
 
@@ -243,11 +243,11 @@ class MasonSolver:
         return self.loops
 
     def __generate_nonTouchingLoops(self):
-        groups: List[List[Loop]] = []
+        groups: List[Set[Loop]] = []
         for i in range(0, len(self.loops)):
             for j in range(i, len(self.loops)):
                 if not lists_overlap(self.loops[i].loop, self.loops[j].loop):
-                    groups.append([self.loops[i], self.loops[j]])
+                    groups.append({self.loops[i], self.loops[j]})
         for length in range(2, len(self.loops)):
             for loop in self.loops:
                 for group in groups:
@@ -259,10 +259,15 @@ class MasonSolver:
                             overlap = True
                             break
                     if not overlap:
-                        newGroup = group[:]
-                        newGroup.append(loop)
-                        groups.append(newGroup)
-
+                        newGroup = group.copy()
+                        newGroup.add(loop)
+                        found = False
+                        for loops in groups:
+                            if newGroup == loops:
+                                found = True
+                                break
+                        if not found:
+                            groups.append(newGroup)
         self.nonTouching_loops = groups
         return groups
 
