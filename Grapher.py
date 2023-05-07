@@ -1,161 +1,132 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-import sys
-
-from MainWindow import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QMessageBox, QDialog, QLabel
+import math
+from typing import *
+import tkinter as tk
+from tkinter import simpledialog
 
 
-class InputDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+class Node:
+    def __init__(self, id, x, y):
+        self.id = id
+        self.x = x
+        self.y = y
 
-        self.setWindowTitle('Input Dialog')
-        self.label = QLabel('Enter Gain:', self)
-        self.line_edit = QLineEdit(self)
-        self.ok_button = QPushButton('OK', self)
-        self.cancel_button = QPushButton('Cancel', self)
+class Edge:
+    def __init__(self, src, dst, gain):
+        self.src = src
+        self.dst = dst
+        self.gain = gain
 
-        self.ok_button.clicked.connect(self.accept)
-        self.cancel_button.clicked.connect(self.reject)
+class Graph:
+    def __init__(self, num_nodes):
+        self.nodes = []
+        self.edges = []
+        self.adj_list: Dict[str, Dict[str, Dict[str, str]]] = {}
+        start = 135
+        interval = 1650 / (num_nodes - 1)
+        for i in range(num_nodes):
+            self.adj_list[str(i + 1)] = {}
+            self.nodes.append(Node(i + 1, start + i * interval, 500))
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.label)
-        layout.addWidget(self.line_edit)
-        layout.addWidget(self.ok_button)
-        layout.addWidget(self.cancel_button)
+    def add_edge(self, src_id, dst_id, gain):
+        src_node = self.get_node(src_id)
+        dst_node = self.get_node(dst_id)
+        self.adj_list[str(src_id)][str(dst_id)] = {'weight': gain}
+        self.edges.append(Edge(src_node, dst_node, gain))
 
-    def get_text(self):
-        text, ok = self.line_edit.text(), self.result() == QDialog.Accepted
-        return text if ok and text != '' else None
+    def get_node(self, id):
+        for node in self.nodes:
+            if node.id == id:
+                return node
+        return None
 
 
-class Grapher:
-    GDraw = nx.DiGraph()
-    G = nx.DiGraph()
-    input_dialogue = InputDialog()
-    from_node = None
-    to_node = None
-    noNodes = 0
-    weight = 0
+class SignalFlowGraph:
+    graph: Graph = None
 
-    @classmethod
-    def add_node(cls, event):
+    def __init__(self, master, num_nodes):
+        self.selected_node = None
+        self.graph = Graph(num_nodes)
+        self.canvas = tk.Canvas(master, width=1920, height=1080)
+        self.canvas.pack()
+        self.canvas.bind("<Button-1>", self.on_click)
+        self.draw_graph()
 
-        if event.button == 1 and cls.noNodes > 0:  # left mouse button
-            x, y = event.xdata, event.ydata
-            node = len(cls.GDraw)
-            cls.GDraw.add_node(node, pos=(x, y))
-            cls.G.add_node(node, pos=(x, y))
-            cls.noNodes = cls.noNodes - 1
-            cls.draw_graph()
-
-        if event.button == 1 and event.dblclick and cls.noNodes > 0:
-            node = cls.get_closest_node(event.xdata, event.ydata)
-            print("heyy")
-            if cls.source is not None:
-                cls.destination = node
-                nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='green',
-                                       nodelist=[cls.destination])
-                print("selected node is: ", cls.destination)
+    def draw_graph(self):
+        for edge in self.graph.edges:
+            x1, y1 = edge.src.x, edge.src.y
+            x2, y2 = edge.dst.x, edge.dst.y
+            gain = edge.gain
+            dist = (x2 - x1) / 3.5
+            if dist > 0:
+                self.draw_forward_edge(x1, y1, x2, y2, gain, dist)
+            elif dist < 0:
+                self.draw_backward_edge(x1, y1, x2, y2, gain, dist)
             else:
-                cls.source = node
-                nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='green',
-                                       nodelist=[cls.source])
-                print("selected node is: ", cls.source)
+                self.draw_self_edge(x1, y1, gain)
+        for node in self.graph.nodes:
+            self.canvas.create_oval(node.x - 40, node.y - 40, node.x + 40, node.y + 40, fill="white", width=4)
+            self.canvas.create_text(node.x, node.y, text=node.id, font=("Helvetica", 18))
 
-            plt.draw()
+    def draw_forward_edge(self, x1, y1, x2, y2, gain, dist):
+        self.canvas.create_arc(x1, y1 - dist, x2, y2 + dist, start=0, extent=180,
+                               width=2, style='arc', outline='black')
+        self.draw_arrow((x1 + x2) / 2, (y1 - dist), 10, gain)
 
-        if event.button == 3:  # right mouse button
-            if cls.from_node is None:
-                cls.from_node = cls.get_closest_node(event.xdata, event.ydata)
-                if cls.from_node is not None:
-                    nx.draw_networkx_nodes(cls.GDraw, pos=nx.get_node_attributes(cls.GDraw, 'pos'), node_color='red',
-                                           nodelist=[cls.from_node])
-                    print("from node is: ", cls.from_node)
-                    plt.draw()
+    def draw_backward_edge(self, x1, y1, x2, y2, gain, dist):
+        self.canvas.create_arc(x1, y1 - dist, x2, y2 + dist, start=180, extent=180,
+                               width=2, style='arc', outline='black')
+        self.draw_arrow((x1 + x2) / 2, (y1 - dist), -10, gain)
 
-            elif cls.to_node is None:
-                cls.to_node = cls.get_closest_node(event.xdata, event.ydata)
-                if cls.to_node is not None:
-                    print("to node is: ", cls.to_node)
-                    if not cls.G.has_edge(cls.from_node, cls.to_node):
-                        cls.G.add_edge(cls.from_node, cls.to_node)
-                        cls.set_weight()
-                        cls.draw_graph()
-                    else:
-                        cls.set_weight()
-                    cls.from_node = None
-                    cls.to_node = None
+    def draw_self_edge(self, x, y, gain):
+        dist = 75
+        self.canvas.create_arc(x - dist / 3, y - dist / 3, x + dist / 3, y - dist, start=270, extent=340,
+                               width=2, style='arc', outline='black')
+        self.draw_arrow(x, y - dist, 10, gain)
 
-    @classmethod
-    def set_weight(cls):
-        QtCore.pyqtRemoveInputHook()
-        cls.weight = cls.get_input()
-        while cls.weight is None or not cls.weight.isnumeric():
-            cls.weight = cls.get_input()
-        cls.G[cls.from_node][cls.to_node]['weight'] = cls.weight
-        pos = nx.get_node_attributes(cls.GDraw, 'pos')
-        nx.draw_networkx_edges(cls.GDraw, pos, edgelist=[(cls.from_node, cls.to_node, cls.weight)],
-                               connectionstyle='arc3,rad=0.5')
-        edge_labels = nx.get_edge_attributes(cls.G, 'weight')
-        nx.draw_networkx_edge_labels(cls.G, pos, edge_labels=edge_labels, label_pos=0.5,
-                                     horizontalalignment='center', verticalalignment='bottom')
-        plt.show()
-        print("Adj list", cls.G.adj)
+    def draw_arrow(self, x, y, r, g):
+        x1 = x + r
+        y1 = y
+        x2 = x - r / 2
+        y2 = y + r * math.sqrt(3) / 2
+        x3 = x2
+        y3 = y - r * math.sqrt(3) / 2
+        self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill="white", width=2, outline='black')
+        self.canvas.create_text(x, y + 2 * r, text=g, font=("default", 13))
 
-    @classmethod
-    def get_closest_node(cls, x, y):
-        pos = nx.get_node_attributes(cls.GDraw, 'pos')
-        min_dist = float('inf')
-        closest_node = None
-        for node, (nx_, ny_) in pos.items():
-            dist = (nx_ - x) ** 2 + (ny_ - y) ** 2
-            if dist < min_dist:
-                min_dist = dist
-                closest_node = node
-        if min_dist <= 0.01:
-            return closest_node
-        else:
-            return None
+    def on_click(self, event):
+        node_id = self.get_node_id(event.x, event.y)
+        if node_id is not None:
+            if self.selected_node is None:
+                self.selected_node = node_id
+            else:
+                gain = simpledialog.askstring(title="Gain", prompt="Please enter the gain:")
+                if gain is not None and gain != "":
+                    found = False
+                    for edge in self.graph.edges:
+                        if edge.src.id == self.selected_node and edge.dst.id == node_id:
+                            try:
+                                edge.gain = str(float(edge.gain) + float(gain)).replace(".0", "")
+                            except ValueError:
+                                edge.gain += ' + ' + gain
+                            found = True
+                            break
+                    if not found:
+                        self.graph.add_edge(self.selected_node, node_id, gain)
+                self.canvas.delete("all")
+                self.draw_graph()
+                self.selected_node = None
 
-    @classmethod
-    def draw_graph(cls):
-        pos = nx.get_node_attributes(cls.GDraw, 'pos')
-        nx.draw_networkx(cls.GDraw, pos=pos)
-        edge_labels = nx.get_edge_attributes(cls.GDraw, 'weight')
-        if edge_labels:
-            nx.draw_networkx_edge_labels(cls.GDraw, pos=pos, edge_labels=edge_labels, node_size=500)
-        plt.draw()
-
-    @classmethod
-    def clear_graph(cls):
-        cls.GDraw.clear()
-        cls.G.clear()
-        cls.from_node = None
-        cls.to_node = None
-        cls.draw_graph()
-
-    @classmethod
-    def get_input(cls):
-        cls.input_dialogue.exec_()
-        return cls.input_dialogue.get_text()
+    def get_node_id(self, x, y):
+        for node in self.graph.nodes:
+            if (x - node.x) ** 2 + (y - node.y) ** 2 < 1600:
+                return node.id
+        if self.selected_node is not None:
+            self.selected_node = None
+        return None
 
 
-# Create a Matplotlib figure and axes
-fig, ax = plt.subplots()
-
-# Set the limits of the axes
-ax.set_xlim([-1, 1])
-ax.set_ylim([-1, 1])
-
-# Register the event handler function for mouse clicks
-fig.canvas.mpl_connect('button_press_event', Grapher.add_node)
-
-# Register the event handler function for closing the window
-# cid_close = fig.canvas.mpl_connect('close_event', Grapher.clear_graph)
-
-# Draw the initial empty graph
-Grapher.draw_graph()
-
-plt.show()
+def run(num_nodes):
+    root = tk.Tk(className=" Signal Flow Graph")
+    graph = SignalFlowGraph(root, num_nodes)
+    root.mainloop()
+    return graph
