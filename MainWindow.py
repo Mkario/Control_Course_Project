@@ -54,7 +54,7 @@ class Ui_MainWindow(object):
         self.titlelLine.setFrameShape(QtWidgets.QFrame.HLine)
 
         self.noNodesLabel = QtWidgets.QLabel(self.centralwidget)
-        self.noNodesLabel.setGeometry(QtCore.QRect(10, 110, 251, 51))
+        self.noNodesLabel.setGeometry(QtCore.QRect(20, 110, 251, 51))
 
         self.enterGraph = QtWidgets.QPushButton(self.centralwidget)
         self.enterGraph.setGeometry(QtCore.QRect(390, 130, 211, 71))
@@ -81,7 +81,6 @@ class Ui_MainWindow(object):
         self.solutionLine.setFrameShadow(QtWidgets.QFrame.Plain)
         self.solutionLine.setLineWidth(2)
         self.solutionLine.setFrameShape(QtWidgets.QFrame.HLine)
-        self.solutionLine.setObjectName("solutionLine")
 
         self.end = QtWidgets.QSpinBox(self.centralwidget)
         self.end.setGeometry(QtCore.QRect(210, 270, 131, 51))
@@ -90,8 +89,6 @@ class Ui_MainWindow(object):
         font.setPointSize(22)
         self.end.setFont(font)
         self.end.setStyleSheet("background-color: ghostWhite;")
-        self.end.setObjectName("end")
-        self.end.valueChanged.connect(self.setEnd)
 
         self.start = QtWidgets.QSpinBox(self.centralwidget)
         self.start.setGeometry(QtCore.QRect(20, 270, 141, 51))
@@ -100,7 +97,6 @@ class Ui_MainWindow(object):
         font.setPointSize(22)
         self.start.setFont(font)
         self.start.setStyleSheet("background-color: ghostWhite;")
-        self.start.valueChanged.connect(self.setStart)
 
         self.end_label = QtWidgets.QLabel(self.centralwidget)
         self.end_label.setGeometry(QtCore.QRect(200, 220, 121, 51))
@@ -142,10 +138,8 @@ class Ui_MainWindow(object):
         self.start.raise_()
         self.end_label.raise_()
         self.scrollArea.raise_()
+
         MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -154,21 +148,50 @@ class Ui_MainWindow(object):
         self.G = Grapher.run(int(self.noNodes.value()))
 
     def calculate(self):
-        solver = MasonSolver(self.G.graph.adj_list, self.source, self.destination)
-        solver.calculate_transferFunction()  # TODO Fix BaseError
+        self.solver = MasonSolver(self.G.graph.adj_list, int(self.start.value()), int(self.end.value()))
         print(self.G.graph.adj_list)
         self.formateOutput()
 
-    def setStart(self):
-        self.source = int(self.start.value())
-        print(str(self.source) + " is the source")
-
-    def setEnd(self):
-        self.destination = int(self.end.value())
-        print(str(self.destination) + " is the destination")
-
     def formateOutput(self):
+
+        font_content = QtGui.QFont()
+        font_content.setFamily("Microsoft New Tai Lue")
+        font_content.setPointSize(15)
+
         solution = 'Solution: \n'
+
+        # Overall transfer function title
+        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Overall transfer ' \
+                    'function:</font>\n '
+        solution += str(self.solver.calculate_transferFunction()) + '\n'
+
+        # System delta title
+        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">System ' \
+                    'Delta:</font> ' + str(self.solver.delta) + '\n'
+
+        # Deltas title
+        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Deltas:</font>\n'
+        for i in range(0, len(self.solver.delta.size)):
+            solution += 'D' + str(i + 1) + ': ' + self.solver.deltas[i] + '\n'
+
+        # Forward paths title
+        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Forward ' \
+                    'paths:</font>\n '
+        for i in range(0, len(self.solver.forwardPaths)):
+            solution += 'P' + str(i + 1) + ': ' + self.solver.forwardPaths[i] + '\n'
+
+        # Loops title
+        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Loops:</font>\n'
+        for i in range(0, len(self.solver.loops)):
+            solution += 'L' + str(i + 1) + ': ' + self.solver.loops[i] + '\n'
+
+        # Non-touching loops title
+        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Non-touching ' \
+                    'loops:</font>\n '
+        for key, value in self.solver.nonTouching_loops_map.items():
+            solution += key + ': ' + value + '\n'
+
+        self.solution.setFont(font_content)
         self.solution.setText(solution)
 
     def retranslateUi(self, MainWindow):
@@ -178,7 +201,7 @@ class Ui_MainWindow(object):
                                                     "font-size:36pt; font-weight:600; font-style:italic; "
                                                     "color:#414141; vertical-align:sub;\">Signal Flow Graph "
                                                     "Solver</span></p></body></html>"))
-        self.noNodesLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:24pt; "
+        self.noNodesLabel.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:23pt; "
                                                            "color:#414141;\">Number of "
                                                            "Nodes</span></p></body></html>"))
         self.enterGraph.setText(_translate("MainWindow", "Enter Graph"))
