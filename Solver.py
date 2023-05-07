@@ -4,9 +4,16 @@ from sympy import sympify
 
 class Loop:
     def __init__(self, loop, gain):
-        self.loop = loop
+        self.loop: List[str] = loop
         self.gain = gain
         self.id = None
+
+    def trace(self):
+        trace = self.loop[0]
+        for node in self.loop[1:]:
+            trace += f' → {node}'
+        trace += f' → {self.loop[0]}'
+        return trace
 
 
 #  ID added after appending to unique_loops
@@ -98,6 +105,7 @@ def combination(lst: List[Loop], length):
 
 
 class ForwardPath:
+    delta: str = ''
     def __init__(self, path, gain):
         self.path = path
         self.gain = gain
@@ -120,6 +128,12 @@ class ForwardPath:
                     newGroup.append(loop)
             if len(newGroup) > 1:
                 self.isloated_notTouchingLoops.append(newGroup)
+    
+    def trace(self):
+        trace = self.path[0]
+        for node in self.path[1:]:
+            trace += f'→ {node}'
+        return trace
 
 
 class MasonSolver:
@@ -136,7 +150,7 @@ class MasonSolver:
     # Can be changed into None to ignore data type
     transferFunction: str = ''  # C/R
 
-    delta: int = 0  # Whole delta
+    delta: str = ''  # Whole delta
 
     def __init__(self, graph, start_node, end_node):
         self.adj_list = graph
@@ -257,14 +271,19 @@ class MasonSolver:
             return '0'
 
         # if isinstance(nonTouching_loops[0][0].gain, str):
-        result = '( '
-        for group in nonTouching_loops:
+        result = '( ('
 
-            if group != nonTouching_loops[0]:
-                if len(group) % 2 == 0:
-                    result += ' + '
-                else:
-                    result += ' - '
+        firstGroup = nonTouching_loops[0]
+
+        for loop in firstGroup:
+            result += f'{loop.gain} * '
+        result = f'{result[:-3]})'
+        
+        for group in nonTouching_loops[1:]:
+            if len(group) % 2 == 0:
+                result += ' + '
+            else:
+                result += ' - '
 
             result += '('
             for loop in group:
@@ -303,29 +322,23 @@ class MasonSolver:
         return f'(1 - {self.__deltaHelper_isolatedLoop(self.loops)} + {self.__deltaHelper_nonTouchingLoops(self.nonTouching_loops)})'
 
     def __delta_path(self, path: ForwardPath):
-        return f'(1 - {self.__deltaHelper_isolatedLoop(path.isolated_loops)} + {self.__deltaHelper_nonTouchingLoops(path.isloated_notTouchingLoops)})'
+        path.delta = f'(1 - {self.__deltaHelper_isolatedLoop(path.isolated_loops)} + {self.__deltaHelper_nonTouchingLoops(path.isloated_notTouchingLoops)})'
+        return path.delta
 
 
 if __name__ == "__main__":
-    nigga = {
-        'r': {'y1': {'weight': 'G1'}, 'y4': {'weight': 'G5'}},
-        'y1': {'y2': {'weight': 'G2'}},
-        'y2': {'y3': {'weight': 'G3'}, 'y1': {'weight': 'H2'}},
-        'y3': {'c': {'weight': 'G4'}, 'y2': {'weight': 'H3'}},
-        'y4': {'y5': {'weight': 'G6'}},
-        'y5': {'y6': {'weight': 'G7'}, 'y4': {'weight': 'H6'}},
-        'y6': {'c': {'weight': 'G8'}, 'y5': {'weight': 'H7'}},
-        'c': {}
-    }
-    solve = MasonSolver(nigga, 'r', 'c')
+    nigga = {'1': {'2': {'weight': '4'}, '4': {'weight': '1'}}, '2': {'3': {'weight': '4'}, '7': {'weight': '7'}, '1': {'weight': '4'}}, '3': {'4': {'weight': '4'}, '2': {'weight': '1'}}, '4': {'5': {'weight': '7'}, '6': {'weight': '4'}, '3': {'weight': '4'}}, '5': {'6': {'weight': '1'}, '4': {'weight': '1'}}, '6': {'7': {'weight': '1'}, '3': {'weight': '4'}, '5': {'weight': '4'}}, '7': {'6': {'weight': '4'}, '2': {'weight': '1'}, '4': {'weight': '4'}}}
+    solve = MasonSolver(nigga, '1', '7')
     for path in solve.forwardPaths:
         print(path.path)
         print(path.gain)
 
     for loop in solve.loops:
-        print("")
+        print(loop.loop)
 
-    for nonTouching in solve.nonTouching_loops:
-        print("")
+    for group in solve.nonTouching_loops:
+        for loop in group:
+            print(loop.trace(), end='\t\t')
+        print()
 
     print(solve.calculate_transferFunction())

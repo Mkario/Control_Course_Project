@@ -148,9 +148,10 @@ class Ui_MainWindow(object):
         self.G = Grapher.run(int(self.noNodes.value()))
 
     def calculate(self):
-        self.solver = MasonSolver(self.G.graph.adj_list, int(self.start.value()), int(self.end.value()))
+        print(f'{type(self.start.value())}: {self.start.value()}')
+        self.solver = MasonSolver(self.G.graph.adj_list, str(self.start.value()), str(self.end.value()))
         print(self.G.graph.adj_list)
-        # self.formateOutput()
+        self.formateOutput()
 
     def formateOutput(self):
 
@@ -169,25 +170,32 @@ class Ui_MainWindow(object):
         solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">System ' \
                     'Delta:</font> ' + str(self.solver.delta) + '\n'
 
-        # Deltas title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Deltas:</font>\n'
-        for i in range(0, len(self.solver.delta.size)):
-            solution += 'D' + str(i + 1) + ': ' + self.solver.deltas[i] + '\n'
+        # # Deltas title
+        # solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Deltas:</font>\n'
+        # for i in range(0, len(self.solver.deltas)):
+        #     solution += f'Δ{i + 1}: {self.solver.deltas[i]}\n'
 
         # Forward paths title
         solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Forward ' \
                     'paths:</font>\n '
         for i in range(0, len(self.solver.forwardPaths)):
-            solution += 'P' + str(i + 1) + ': ' + self.solver.forwardPaths[i] + '\n'
+            solution += f'P{i + 1}: {self.solver.forwardPaths[i].trace()}\n'\
+                f'\tGain:   {self.solver.forwardPaths[i].gain}\n' \
+                f'\tΔ{i + 1}:   {self.solver.forwardPaths[i].delta}\n'
 
         # Loops title
         solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Loops:</font>\n'
         for i in range(0, len(self.solver.loops)):
-            solution += 'L' + str(i + 1) + ': ' + self.solver.loops[i] + '\n'
+            solution += f'L{i + 1}: {self.solver.loops[i].trace()}\n'\
+                f'\tGain:   {self.solver.loops[i].gain}\n'
 
         # Non-touching loops title
         solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Non-touching ' \
                     'loops:</font>\n '
+        for group in self.solver.nonTouching_loops:
+            for loop in group:
+                print(loop.trace(), end = " ")
+            print()
         for key, value in self.solver.nonTouching_loops_map.items():
             solution += key + ': ' + value + '\n'
 
