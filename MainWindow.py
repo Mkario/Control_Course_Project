@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 import Grapher
-from Solver import MasonSolver
+from Solver import MasonSolver, sympify
 
 
 class Ui_MainWindow(object):
@@ -180,14 +180,14 @@ class Ui_MainWindow(object):
                     'paths:</font>\n '
         for i in range(0, len(self.solver.forwardPaths)):
             solution += f'P{i + 1}: {self.solver.forwardPaths[i].trace()}\n'\
-                f'\tGain:   {self.solver.forwardPaths[i].gain}\n' \
-                f'\tΔ{i + 1}:   {self.solver.forwardPaths[i].delta}\n'
+                f'\tGain:   {self.solver.forwardPaths[i].gain} = {sympify(self.solver.forwardPaths[i].gain)}\n' \
+                f'\tΔ{i + 1}:   {self.solver.forwardPaths[i].delta} = {sympify(self.solver.forwardPaths[i].delta)}\n'
 
         # Loops title
         solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Loops:</font>\n'
         for i in range(0, len(self.solver.loops)):
             solution += f'L{i + 1}: {self.solver.loops[i].trace()}\n'\
-                f'\tGain:   {self.solver.loops[i].gain}\n'
+                f'\tGain:   {self.solver.loops[i].gain} = {sympify(self.solver.loops[i].gain)}\n'
 
         # Non-touching loops title
         solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Non-touching ' \
