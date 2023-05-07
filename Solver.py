@@ -327,8 +327,8 @@ class MasonSolver:
 
 
 if __name__ == "__main__":
-    nigga = {'1': {'2': {'weight': '4'}, '4': {'weight': '1'}}, '2': {'3': {'weight': '4'}, '7': {'weight': '7'}, '1': {'weight': '4'}}, '3': {'4': {'weight': '4'}, '2': {'weight': '1'}}, '4': {'5': {'weight': '7'}, '6': {'weight': '4'}, '3': {'weight': '4'}}, '5': {'6': {'weight': '1'}, '4': {'weight': '1'}}, '6': {'7': {'weight': '1'}, '3': {'weight': '4'}, '5': {'weight': '4'}}, '7': {'6': {'weight': '4'}, '2': {'weight': '1'}, '4': {'weight': '4'}}}
-    solve = MasonSolver(nigga, '1', '7')
+    test = {'1': {'2': {'weight': '4'}, '4': {'weight': '1'}}, '2': {'3': {'weight': '4'}, '7': {'weight': '7'}, '1': {'weight': '4'}}, '3': {'4': {'weight': '4'}, '2': {'weight': '1'}}, '4': {'5': {'weight': '7'}, '6': {'weight': '4'}, '3': {'weight': '4'}}, '5': {'6': {'weight': '1'}, '4': {'weight': '1'}}, '6': {'7': {'weight': '1'}, '3': {'weight': '4'}, '5': {'weight': '4'}}, '7': {'6': {'weight': '4'}, '2': {'weight': '1'}, '4': {'weight': '4'}}}
+    solve = MasonSolver(test, '1', '7')
     for path in solve.forwardPaths:
         print(path.path)
         print(path.gain)
