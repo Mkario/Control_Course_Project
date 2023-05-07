@@ -25,6 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(614, 894)
+        MainWindow.setFixedSize(614, 894)
         MainWindow.setStyleSheet("background-color:  rgb(237, 246, 255);")
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -47,6 +48,7 @@ class Ui_MainWindow(object):
         self.noNodes.setFont(font)
         self.noNodes.setStyleSheet("background-color: ghostWhite;")
         self.noNodes.setMaximum(12)
+        self.noNodes.setMinimum(1)
 
         self.titlelLine = QtWidgets.QFrame(self.centralwidget)
         self.titlelLine.setGeometry(QtCore.QRect(0, 90, 611, 16))
@@ -91,6 +93,7 @@ class Ui_MainWindow(object):
         self.end.setFont(font)
         self.end.setStyleSheet("background-color: ghostWhite;")
         self.end.setMaximum(12)
+        self.end.setMinimum(1)
 
         self.start = QtWidgets.QSpinBox(self.centralwidget)
         self.start.setGeometry(QtCore.QRect(20, 270, 141, 51))
@@ -100,6 +103,7 @@ class Ui_MainWindow(object):
         self.start.setFont(font)
         self.start.setStyleSheet("background-color: ghostWhite;")
         self.start.setMaximum(12)
+        self.start.setMinimum(1)
 
         self.end_label = QtWidgets.QLabel(self.centralwidget)
         self.end_label.setGeometry(QtCore.QRect(200, 220, 121, 51))
@@ -148,34 +152,43 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def showGraph(self):
-        self.G = Grapher.run(int(self.noNodes.value()))
+        if int(self.noNodes.value()) >= int(self.start.value()) and int(self.noNodes.value()) >= int(self.end.value()):
+            self.G = Grapher.run(int(self.noNodes.value()))
+        else:
+            self.solution.setHtml(
+                '<span style="font-weight: bold; color: #551712; font-size: 20pt; font-family: Microsoft New Tai '
+                'Lue;">Nodes are Out of Bounds</span>')
 
     def calculate(self):
         print(f'{type(self.start.value())}: {self.start.value()}')
-        self.solver = MasonSolver(self.G.graph.adj_list, str(self.start.value()), str(self.end.value()))
-        self.formateOutput()
+        try:
+            self.solver = MasonSolver(self.G.graph.adj_list, str(self.start.value()), str(self.end.value()))
+            self.formateOutput()
+        except:
+            '<span style="font-weight: bold; color: #551712; font-size: 20pt; font-family: Microsoft New Tai '
+            'Lue;">Nodes out of Bound</span>'
 
     def formateOutput(self):
         font_content = QtGui.QFont()
         font_content.setFamily("Microsoft New Tai Lue")
-        font_content.setPointSize(18)
+        font_content.setPointSize(14)
 
-        solution = '<span style="font-weight: bold; color: #551712; font-size: 22pt; font-family: Microsoft New ' \
+        solution = '<span style="font-weight: bold; color: #551712; font-size: 20pt; font-family: Microsoft New ' \
                    'Tai Lue;">Solution:</span><br>'
 
         # Overall transfer function title
-        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 18pt; font-family: Microsoft New Tai ' \
                     'Lue;">Overall transfer function: </span>'
         solution += str(self.solver.calculate_transferFunction()) + '<br>'
 
         # System delta title
-        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 18pt; font-family: Microsoft New Tai ' \
                     'Lue;">System Delta: </span>'
 
         solution += f'{self.solver.delta}= {sympify(self.solver.delta)}<br>'
 
         # Forward paths title
-        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 18pt; font-family: Microsoft New Tai ' \
                     'Lue;">Forward paths:</span><br>'
         for i in range(0, len(self.solver.forwardPaths)):
             solution += f'P{i + 1}: {self.solver.forwardPaths[i].trace()}<br>' \
@@ -183,16 +196,16 @@ class Ui_MainWindow(object):
                         f'<tab>&nbsp;&nbsp;&nbsp;&nbsp;Δ{i + 1}: {self.solver.forwardPaths[i].delta} = {sympify(self.solver.forwardPaths[i].delta)}<br>'
 
         # Loops title
-        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 18pt; font-family: Microsoft New Tai ' \
                     'Lue;">Loops:</span><br>'
         for i in range(0, len(self.solver.loops)):
             solution += f'L{i + 1}: {self.solver.loops[i].trace()}<br>' \
                         f'<tab>&nbsp;&nbsp;&nbsp;&nbsp;Gain:   {self.solver.loops[i].gain} = {sympify(self.solver.loops[i].gain)}<br>'
 
         # Non-touching loops title
-        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 18pt; font-family: Microsoft New Tai ' \
                     'Lue;">Non-touching loops:</span><br>'
-        
         for key, value in self.solver.nonTouching_loops_map.items():
             solution += key + ': ' + value + '<br>'
 
