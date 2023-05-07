@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 
 import Grapher
-from Solver import MasonSolver
+from Solver import MasonSolver, sympify
 
 
 class Ui_MainWindow(object):
@@ -119,7 +119,7 @@ class Ui_MainWindow(object):
 
         content_layout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
 
-        self.solution = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.solution = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
         self.solution.setGeometry(10, 10, 10, 10)
         self.solution.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
@@ -148,51 +148,57 @@ class Ui_MainWindow(object):
         self.G = Grapher.run(int(self.noNodes.value()))
 
     def calculate(self):
-        self.solver = MasonSolver(self.G.graph.adj_list, int(self.start.value()), int(self.end.value()))
+        print(f'{type(self.start.value())}: {self.start.value()}')
+        self.solver = MasonSolver(self.G.graph.adj_list, str(self.start.value()), str(self.end.value()))
         print(self.G.graph.adj_list)
-        # self.formateOutput()
+        self.formateOutput()
 
     def formateOutput(self):
-
         font_content = QtGui.QFont()
         font_content.setFamily("Microsoft New Tai Lue")
-        font_content.setPointSize(15)
+        font_content.setPointSize(18)
 
-        solution = 'Solution: \n'
+        solution = '<span style="font-weight: bold; color: #551712; font-size: 22pt; font-family: Microsoft New ' \
+                   'Tai Lue;">Solution:</span><br>'
 
         # Overall transfer function title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Overall transfer ' \
-                    'function:</font>\n '
-        solution += str(self.solver.calculate_transferFunction()) + '\n'
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+                    'Lue;">Overall transfer function: </span>'
+        solution += str(self.solver.calculate_transferFunction()) + '<br>'
 
         # System delta title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">System ' \
-                    'Delta:</font> ' + str(self.solver.delta) + '\n'
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+                    'Lue;">System Delta: </span>'
 
-        # Deltas title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Deltas:</font>\n'
-        for i in range(0, len(self.solver.delta.size)):
-            solution += 'D' + str(i + 1) + ': ' + self.solver.deltas[i] + '\n'
+        solution += str(self.solver.delta) + '<br>'
 
         # Forward paths title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Forward ' \
-                    'paths:</font>\n '
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+                    'Lue;">Forward paths:</span><br>'
         for i in range(0, len(self.solver.forwardPaths)):
-            solution += 'P' + str(i + 1) + ': ' + self.solver.forwardPaths[i] + '\n'
+            solution += f'P{i + 1}: {self.solver.forwardPaths[i].trace()}<br>' \
+                        f'\tGain:   {self.solver.forwardPaths[i].gain} = {sympify(self.solver.forwardPaths[i].gain)}<br>' \
+                        f'\tΔ{i + 1}:   {self.solver.forwardPaths[i].delta} = {sympify(self.solver.forwardPaths[i].delta)}<br> '
 
         # Loops title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Loops:</font>\n'
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+                    'Lue;">Loops:</span><br>'
         for i in range(0, len(self.solver.loops)):
-            solution += 'L' + str(i + 1) + ': ' + self.solver.loops[i] + '\n'
+            solution += f'L{i + 1}: {self.solver.loops[i].trace()}<br>' \
+                        f'\tGain:   {self.solver.loops[i].gain} = {sympify(self.solver.loops[i].gain)}<br>'
 
         # Non-touching loops title
-        solution += '<font style="font-size:15pt; color:#110F55; font-family:Microsoft New Tai Lue">Non-touching ' \
-                    'loops:</font>\n '
+        solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
+                    'Lue;">Non-touching loops:</span><br>'
+        for group in self.solver.nonTouching_loops:
+            for loop in group:
+                print(loop.trace(), end=" ")
+            print()
         for key, value in self.solver.nonTouching_loops_map.items():
             solution += key + ': ' + value + '\n'
 
         self.solution.setFont(font_content)
-        self.solution.setText(solution)
+        self.solution.setHtml(solution)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
