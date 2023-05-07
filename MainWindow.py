@@ -157,7 +157,7 @@ class Ui_MainWindow(object):
         solver = MasonSolver(self.G.graph.adj_list, self.source, self.destination)
         solver.calculate_transferFunction()  # TODO Fix BaseError
         print(self.G.graph.adj_list)
-        self.formateOutput()
+        # self.formateOutput()
 
     def setStart(self):
         self.source = int(self.start.value())
