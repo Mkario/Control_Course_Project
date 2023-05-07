@@ -177,15 +177,15 @@ class Ui_MainWindow(object):
                     'Lue;">Forward paths:</span><br>'
         for i in range(0, len(self.solver.forwardPaths)):
             solution += f'P{i + 1}: {self.solver.forwardPaths[i].trace()}<br>' \
-                        f'\tGain:   {self.solver.forwardPaths[i].gain} = {sympify(self.solver.forwardPaths[i].gain)}<br>' \
-                        f'\tΔ{i + 1}:   {self.solver.forwardPaths[i].delta} = {sympify(self.solver.forwardPaths[i].delta)}<br> '
+                        f'<tab>&nbsp;&nbsp;&nbsp;&nbsp;Gain: {self.solver.forwardPaths[i].gain} = {sympify(self.solver.forwardPaths[i].gain)}<br>' \
+                        f'<tab>&nbsp;&nbsp;&nbsp;&nbsp;Δ{i + 1}: {self.solver.forwardPaths[i].delta} = {sympify(self.solver.forwardPaths[i].delta)}<br>'
 
         # Loops title
         solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
                     'Lue;">Loops:</span><br>'
         for i in range(0, len(self.solver.loops)):
             solution += f'L{i + 1}: {self.solver.loops[i].trace()}<br>' \
-                        f'\tGain:   {self.solver.loops[i].gain} = {sympify(self.solver.loops[i].gain)}<br>'
+                        f'<tab>&nbsp;&nbsp;&nbsp;&nbsp;Gain:   {self.solver.loops[i].gain} = {sympify(self.solver.loops[i].gain)}<br>'
 
         # Non-touching loops title
         solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
