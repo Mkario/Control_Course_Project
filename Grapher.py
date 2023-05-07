@@ -106,15 +106,17 @@ class SignalFlowGraph:
                         if edge.src.id == self.selected_node and edge.dst.id == node_id:
                             try:
                                 edge.gain = str(float(edge.gain) + float(gain)).replace(".0", "")
+                                self.graph.adj_list[str(edge.src.id)][str(edge.dst.id)] = {'weight': edge.gain}
                             except ValueError:
                                 edge.gain += ' + ' + gain
+                                self.graph.adj_list[str(edge.src.id)][str(edge.dst.id)] = {'weight': edge.gain}
                             found = True
                             break
                     if not found:
                         self.graph.add_edge(self.selected_node, node_id, gain)
                 self.canvas.delete("all")
-                self.draw_graph()
                 self.selected_node = None
+                self.draw_graph()
 
     def get_node_id(self, x, y):
         for node in self.graph.nodes:
