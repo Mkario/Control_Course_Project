@@ -46,6 +46,7 @@ class Ui_MainWindow(object):
         font.setPointSize(22)
         self.noNodes.setFont(font)
         self.noNodes.setStyleSheet("background-color: ghostWhite;")
+        self.noNodes.setMaximum(12)
 
         self.titlelLine = QtWidgets.QFrame(self.centralwidget)
         self.titlelLine.setGeometry(QtCore.QRect(0, 90, 611, 16))
@@ -89,6 +90,7 @@ class Ui_MainWindow(object):
         font.setPointSize(22)
         self.end.setFont(font)
         self.end.setStyleSheet("background-color: ghostWhite;")
+        self.end.setMaximum(12)
 
         self.start = QtWidgets.QSpinBox(self.centralwidget)
         self.start.setGeometry(QtCore.QRect(20, 270, 141, 51))
@@ -97,6 +99,7 @@ class Ui_MainWindow(object):
         font.setPointSize(22)
         self.start.setFont(font)
         self.start.setStyleSheet("background-color: ghostWhite;")
+        self.start.setMaximum(12)
 
         self.end_label = QtWidgets.QLabel(self.centralwidget)
         self.end_label.setGeometry(QtCore.QRect(200, 220, 121, 51))
@@ -195,7 +198,7 @@ class Ui_MainWindow(object):
                 print(loop.trace(), end=" ")
             print()
         for key, value in self.solver.nonTouching_loops_map.items():
-            solution += key + ': ' + value + '\n'
+            solution += key + ': ' + value + '<br>'
 
         self.solution.setFont(font_content)
         self.solution.setHtml(solution)
