@@ -150,7 +150,7 @@ class Ui_MainWindow(object):
     def calculate(self):
         self.solver = MasonSolver(self.G.graph.adj_list, int(self.start.value()), int(self.end.value()))
         print(self.G.graph.adj_list)
-        self.formateOutput()
+        # self.formateOutput()
 
     def formateOutput(self):
 
