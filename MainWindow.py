@@ -153,7 +153,6 @@ class Ui_MainWindow(object):
     def calculate(self):
         print(f'{type(self.start.value())}: {self.start.value()}')
         self.solver = MasonSolver(self.G.graph.adj_list, str(self.start.value()), str(self.end.value()))
-        print(self.G.graph.adj_list)
         self.formateOutput()
 
     def formateOutput(self):
@@ -173,7 +172,7 @@ class Ui_MainWindow(object):
         solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
                     'Lue;">System Delta: </span>'
 
-        solution += str(self.solver.delta) + '<br>'
+        solution += f'{self.solver.delta}= {sympify(self.solver.delta)}<br>'
 
         # Forward paths title
         solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
@@ -193,10 +192,7 @@ class Ui_MainWindow(object):
         # Non-touching loops title
         solution += '<span style="font-weight: bold; color: #293241; font-size: 20pt; font-family: Microsoft New Tai ' \
                     'Lue;">Non-touching loops:</span><br>'
-        for group in self.solver.nonTouching_loops:
-            for loop in group:
-                print(loop.trace(), end=" ")
-            print()
+        
         for key, value in self.solver.nonTouching_loops_map.items():
             solution += key + ': ' + value + '<br>'
 
