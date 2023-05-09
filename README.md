@@ -1,5 +1,5 @@
 # Control Course Project
-## 1) GUI Application for visuallizing and solving signal flow graph problem
+## 1) GUI Application for visualizing and solving signal flow graph problem
 A signal flow graph (SFG) is a graphical representation of a system or network using nodes and directed edges. It is commonly used in control systems engineering to analyze and design linear time-invariant (LTI) systems.
 
 In an SFG, nodes represent variables or signals, and directed edges represent the flow of signals between nodes. The direction of the edges indicates the flow of signals from one node to another. Each edge is associated with a gain or transfer function that describes the relationship between the input and output signals.
